@@ -9,17 +9,43 @@ import scala.concurrent.Future
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class MeasurementService @Inject()(w1t: W1Service, i2ct: I2cService) {
+import play.api.libs.ws.WSClient
+import play.api.Configuration
+import play.api.libs.json.JsArray
+import play.api.libs.ws.WSAuthScheme
+
+class MeasurementService @Inject()(w1t: W1Service, i2ct: I2cService, ws: WSClient, configuration: Configuration) {
+  
+  val url = configuration.get[String]("measurement.send-to")
+  val username = configuration.get[String]("measurement_server.username")
+  val password = configuration.get[String]("measurement_server.password")
+  
+  var recentMeasurements: List[Measurement] = Nil
+  
+  def sendMeasurements(measurements: List[Measurement]): Future[Unit] = {
+    ws.url(url)
+      .withAuth(username, password, WSAuthScheme.BASIC)
+      .post(JsArray(measurements.map(_.toJson)))
+      .map(_ => Unit)
+  }
   
   def measure(): Future[List[Measurement]] = {
     val now = new DateTime()
     val w1f = w1t.measure(now)
     val i2cf = i2ct.measure(now)
     
-    for(
+    val newMeasurementsFuture = for(
       w1 <- w1f;
       i2c <- i2cf
-    ) yield w1 ++ i2c
+    ) yield {
+      val ml = w1 ++ i2c
+      recentMeasurements = (ml ++ recentMeasurements).take(100)
+      ml
+    }
+    
+    newMeasurementsFuture
+      .flatMap(measurements => sendMeasurements(measurements))
+      .flatMap(_ => newMeasurementsFuture)
   }
   
 }

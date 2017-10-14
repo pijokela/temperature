@@ -12,15 +12,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class HomeController @Inject()(cc: ControllerComponents, measurementService: MeasurementService) extends AbstractController(cc) {
 
   def index() = Action { implicit request: Request[AnyContent] =>
-    Ok(JsArray(recentMeasurements.map(_.toJson)))
+    Ok(JsArray(
+        measurementService.recentMeasurements.map(_.toJson)
+    ))
   }
-  
-  var recentMeasurements: List[Measurement] = Nil
   
   def measure() = Action.async { implicit request: Request[AnyContent] =>
     measurementService.measure().map { measurements: List[Measurement] =>
-      // Store some information about recent measurements:
-      recentMeasurements = (measurements ++ recentMeasurements).take(100)
       Ok(JsArray(measurements.map(_.toJson)))
     }
   }

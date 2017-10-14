@@ -19,14 +19,14 @@ trait Config {
 
 class RealConfig @Inject()(val configuration: Configuration) extends Config {
   override def string(key: String): Option[String] =
-    configuration.getString(key)
+    configuration.get[Option[String]](key)
   
   import scala.collection.JavaConversions._
   override def stringList(key: String): List[String] =
     configuration.getStringList(key).toList.flatten
     
   override def boolean(key: String): Option[Boolean] =
-    configuration.getBoolean(key)
+    configuration.get[Option[Boolean]](key)
 }
 
 case class TestConfig(values: Map[String, Any]) extends Config {
