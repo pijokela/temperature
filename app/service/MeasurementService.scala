@@ -31,8 +31,10 @@ class MeasurementService @Inject()(w1t: W1Service, i2ct: I2cService, ws: WSClien
   
   def measure(): Future[List[Measurement]] = {
     val now = new DateTime()
-    val w1f = w1t.measure(now)
-    val i2cf = i2ct.measure(now)
+    val w1f = if (w1t.isOnline()) 
+      w1t.measure(now) else Future.successful(Nil)
+    val i2cf = if (i2ct.isOnline())
+      i2ct.measure(now) else Future.successful(Nil)
     
     val newMeasurementsFuture = for(
       w1 <- w1f;

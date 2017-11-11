@@ -1,0 +1,10 @@
+[Unit]
+Description=Temperature monitoring
+
+[Service]
+ExecStart=/opt/temperature/bin/temperature
+Type=simple
+User=pi
+
+[Install]
+WantedBy=multi-user.target
