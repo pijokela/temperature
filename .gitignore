@@ -5,3 +5,4 @@ logs
 .cache-main
 .settings
 bin
+security.conf
