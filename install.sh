@@ -28,7 +28,7 @@ scp cacerts ${TARGET_SERVER}:
 ssh ${TARGET_SERVER} sudo mv /home/pi/cacerts /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt/jre/lib/security/
 ssh ${TARGET_SERVER} sudo chown root:root /usr/lib/jvm/jdk-8-oracle-arm32-vfp-hflt/jre/lib/security/cacerts
 
-scp conf/application-$1.conf ${TARGET_SERVER}:/opt/temperature/conf/
+scp conf/application-$1.conf ${TARGET_SERVER}:/opt/temperature/conf/application.conf
 
 # UPSTART:
 #ssh ${TARGET_SERVER} sudo restart ${SERVICE}
